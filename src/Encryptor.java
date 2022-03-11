@@ -32,6 +32,13 @@ public class Encryptor
      */
     public void fillBlock(String str)
     {
+
+        for (int row = 0; row < letterBlock.length; row++){
+            for (int col = 0; col < letterBlock[0].length; col++) {
+                letterBlock[row][col] = null;
+            }
+        }
+
         int x = 0;
         for (int rows = 0; rows < letterBlock.length; rows++)
         {
@@ -92,18 +99,19 @@ public class Encryptor
             String block = "";
 
             if (i == 0) {
-                block = message.substring(0, i + letterBlockLength - 1);
+                block = message.substring(0, i + letterBlockLength);
             } else {
-                try {
-                    block = message.substring((i * letterBlockLength - 1) + 1, ((i + 1) * letterBlockLength) - 1);
-                } catch (StringIndexOutOfBoundsException err) {
-                    block = message.substring((i * letterBlockLength - 1) + 1);
+                if (i != amountOfBlocks - 1) {
+                    block = message.substring(i * letterBlockLength, ((i + 1) * letterBlockLength));
+                } else {
+                    block = message.substring(i * letterBlockLength);
                 }
             }
 
+            if (block.equals("")) break;
+
             fillBlock(block);
             result += encryptBlock();
-
         }
 
         return result;
@@ -133,8 +141,64 @@ public class Encryptor
      */
     public String decryptMessage(String encryptedMessage)
     {
-        /* to be implemented in part (d) */
+        String result = "";
 
-        return "";
+        int letterBlockLength = letterBlock.length * (letterBlock[0].length);
+        int amountOfBlocks = (int) ((encryptedMessage.length() / ((double) letterBlockLength)) + 1);
+
+        for (int i = 0; i < amountOfBlocks; i++) {
+            String block = "";
+
+            if (i == 0) {
+                block = encryptedMessage.substring(0, i + letterBlockLength);
+            } else {
+                if (i != amountOfBlocks - 1) {
+                    block = encryptedMessage.substring(i * letterBlockLength, ((i + 1) * letterBlockLength));
+                } else {
+                    block = encryptedMessage.substring(i * letterBlockLength);
+                }
+            }
+
+            if (block.equals("")) break;
+
+            fillBlockCol(block);
+
+            for (int row = 0; row < letterBlock.length; row++){
+                for (int col = 0; col < letterBlock[0].length; col++) {
+                    result += letterBlock[row][col];
+                }
+            }
+
+        }
+
+        for (int i = result.length() - 1; i > -1; i--) {
+            if (result.charAt(i) != 'A') {
+                result = result.substring(0, i + 1);
+                return result;
+            }
+        }
+
+        return result;
+    }
+
+    private void fillBlockCol(String str)
+    {
+        for (int col = 0; col < letterBlock[0].length; col++){
+            for (int row = 0; row < letterBlock.length; row++) {
+                letterBlock[row][col] = null;
+            }
+        }
+
+        int x = 0;
+        for (int cols = 0; cols < letterBlock[0].length; cols++) {
+            for (int rows = 0; rows < letterBlock.length; rows++)
+            {
+                if (x != str.length())
+                {
+                    letterBlock[rows][cols] = str.substring(x, x + 1);
+                    x++;
+                }
+            }
+        }
     }
 }
