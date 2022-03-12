@@ -2,6 +2,7 @@ public class Encryptor
 {
     /** A two-dimensional array of single-character strings, instantiated in the constructor */
     private String[][] letterBlock;
+    private String[][][] letter3DBlock;
 
     /** The number of rows of letterBlock, set by the constructor */
     private int numRows;
@@ -197,6 +198,165 @@ public class Encryptor
                 {
                     letterBlock[rows][cols] = str.substring(x, x + 1);
                     x++;
+                }
+            }
+        }
+    }
+
+    public String superEncryptMessage(String message, Key key) {
+
+        int x = key.getX();
+        int y = key.getY();
+        int z = key.getZ();
+
+        String result = "";
+
+        int letterBlockLength = x * y * z;
+        int amountOfBlocks = (int) ((message.length() / ((double) letterBlockLength)) + 1);
+
+        for (int i = 0; i < amountOfBlocks; i++) {
+
+            String block = "";
+
+            if (amountOfBlocks == 1) {
+                block = message;
+            } else if (i == 0) {
+                block = message.substring(0, i + letterBlockLength);
+            } else {
+                if (i != amountOfBlocks - 1) {
+                    block = message.substring(i * letterBlockLength, ((i + 1) * letterBlockLength));
+                } else {
+                    block = message.substring(i * letterBlockLength);
+                }
+            }
+
+            if (block.equals("")) break;
+
+            fill3DBlock(block, x, y, z);
+
+            for (int yAxis = 0; yAxis < letter3DBlock.length; yAxis++) {
+
+                for (int xAxis = 0; xAxis < letter3DBlock[0].length; xAxis++) {
+
+                    for (int zAxis = 0; zAxis < letter3DBlock[0][0].length; zAxis++) {
+
+                        result += letter3DBlock[yAxis][xAxis][zAxis];
+
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public String superDecryptMessage(String message, Key key) {
+
+        int x = key.getX();
+        int y = key.getY();
+        int z = key.getZ();
+
+        String result = "";
+
+        int letterBlockLength = x * y * z;
+        int amountOfBlocks = (int) ((message.length() / ((double) letterBlockLength)) + 1);
+
+        for (int i = 0; i < amountOfBlocks; i++) {
+
+            String block = "";
+
+            //make private helper method for this
+            if (amountOfBlocks == 1) {
+                block = message;
+            } else if (i == 0) {
+                block = message.substring(0, i + letterBlockLength);
+            } else {
+                if (i != amountOfBlocks - 1) {
+                    block = message.substring(i * letterBlockLength, ((i + 1) * letterBlockLength));
+                } else {
+                    block = message.substring(i * letterBlockLength);
+                }
+            }
+
+            if (block.equals("")) break;
+
+            fill3DBlockForDecryption(block, z, x, y);
+
+            for (int xAxis = letter3DBlock[0].length - 1; xAxis > -1; xAxis--) {
+
+                for (int yAxis = letter3DBlock.length - 1; yAxis > -1; yAxis--) {
+
+                    for (int zAxis = letter3DBlock[0][0].length - 1; zAxis > -1; zAxis--) {
+
+                        result = letter3DBlock[yAxis][xAxis][zAxis] + result;
+
+                    }
+                }
+            }
+        }
+
+        String reversedResult = "";
+
+        for (int i = result.length() - letterBlockLength; i > -1; i -= letterBlockLength) {
+            reversedResult += result.substring(i, i + letterBlockLength);
+        }
+
+        for (int i = reversedResult.length() - 1; i > -1; i--) {
+            if (reversedResult.charAt(i) != 'A') {
+                reversedResult = reversedResult.substring(0, i + 1);
+                return reversedResult;
+            }
+        }
+
+        return reversedResult;
+
+    }
+
+    private void fill3DBlock(String message, int x, int y, int z) {
+
+        String[] chars = message.split("");
+
+        letter3DBlock = new String[y][x][z];
+
+        int indexCount = 0;
+
+        for (int zAxis = 0; zAxis < letter3DBlock[0][0].length; zAxis++) {
+
+            for (int xAxis = 0; xAxis < letter3DBlock[0].length; xAxis++) {
+
+                for (int yAxis = 0; yAxis < letter3DBlock.length; yAxis++) {
+
+                    if (indexCount < chars.length) {
+                        letter3DBlock[yAxis][xAxis][zAxis] = chars[indexCount];
+                        indexCount++;
+                    } else {
+                        letter3DBlock[yAxis][xAxis][zAxis] = "A";
+                    }
+                }
+            }
+        }
+    }
+
+    private void fill3DBlockForDecryption(String message, int x, int y, int z) {
+
+        String[] chars = message.split("");
+
+        letter3DBlock = new String[y][x][z];
+
+        int indexCount = 0;
+
+        for (int zAxis = 0; zAxis < letter3DBlock[0][0].length; zAxis++) {
+
+            for (int yAxis = 0; yAxis < letter3DBlock.length; yAxis++) {
+
+                for (int xAxis = 0; xAxis < letter3DBlock[0].length; xAxis++) {
+
+                    if (indexCount < chars.length) {
+                        letter3DBlock[yAxis][xAxis][zAxis] = chars[indexCount];
+                        indexCount++;
+                    } else {
+                        letter3DBlock[yAxis][xAxis][zAxis] = "";
+                    }
                 }
             }
         }
